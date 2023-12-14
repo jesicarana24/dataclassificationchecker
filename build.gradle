@@ -1,0 +1,72 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+        
+    }
+}
+
+plugins {
+  id 'java'
+  id 'io.spring.dependency-management' version '1.0.7.RELEASE'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+configurations {
+  // for putting Error Prone javac in bootclasspath for running tests
+  errorproneJavac
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.checkerframework', name: 'framework-test', version: '3.37.0'
+    implementation group: 'org.checkerframework', name: 'checker', version: '3.37.0'
+    implementation group: 'org.checkerframework', name: 'checker-qual', version: '3.37.0'
+   
+   
+
+}
+test {
+    inputs.files("tests/kms")
+    if (!JavaVersion.current().java9Compatible) {
+        jvmArgs "-Xbootclasspath/p:${configurations.errorproneJavac.asPath}"
+    }
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat "full"
+        events "failed"
+    }
+}
+
+// test {
+//   inputs.files("tests/kms")
+//   if (!JavaVersion.current().java9Compatible) {
+//     jvmArgs "-Xbootclasspath/p:${configurations.errorproneJavac.asPath}"
+//   }
+//     systemProperty 'errorprone.outputFormat', 'simple'
+//    testLogging {
+//         showStandardStreams = true
+//         // Show the found unexpected diagnostics and expected diagnostics not found.
+//         exceptionFormat "full"
+//         events "failed"
+//     }
+// }
+
+dependencyManagement {
+    imports {
+    }
+}
+//apply plugin: 'org.checkerframework'
+
+task copyDependencies(type: Copy) {
+    from configurations.implementation
+    into 'dependencies'
+}
